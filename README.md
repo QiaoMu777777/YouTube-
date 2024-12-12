@@ -105,7 +105,7 @@ source venv/bin/activate  # Linux/Mac
 venv\Scripts\activate     # Windows
 ```
 
-3. 安装依赖：
+3. 安装依赖��
 ```bash
 pip install -r requirements.txt
 ```
@@ -157,3 +157,24 @@ MIT License
 ## 联系方式
 
 如有问题或建议，请提交 Issue 或发送邮件至 qiaomu6666@gmail.com
+
+## 分支管理
+
+本项目包含以下分支：
+
+- `main`: 主分支，保存稳定版本
+- `local-version`: 本地运行版本，适合个人使用
+- `deploy-version`: 在线部署版本，支持多人使用（开发中）
+
+### 分支用途说明
+
+- **local-version**：
+  - 本地运行的稳定版本
+  - 适合个人使用
+  - 直接下载到本地存储
+
+- **deploy-version**：
+  - 支持在线部署
+  - 多用户支持
+  - 云存储支持
+  - 用户认证功能
