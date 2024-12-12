@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>乔木YouTube视频下载</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <div class="container mx-auto px-4 py-8 flex-grow">
+        <!-- 标题部分 -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">乔木YouTube视频下载</h1>
+            <p class="text-gray-600">输入 YouTube 视频链接，轻松下载高质量视频</p>
+        </div>
+
+        <!-- 下载表单 -->
+        <div class="max-w-xl mx-auto bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="flex gap-2">
+                <input type="text" 
+                       id="video-url" 
+                       class="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+                       placeholder="请输入 YouTube 视频链接">
+                <button onclick="downloadVideo()"
+                        class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+                    下载
+                </button>
+            </div>
+            <!-- 下载进度显示 -->
+            <div id="progress" class="mt-4 hidden">
+                <div class="flex items-center gap-2">
+                    <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <span id="progress-text" class="text-sm text-gray-600">0%</span>
+                </div>
+                <p id="download-status" class="mt-2 text-sm text-gray-600"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚部分 -->
+    <footer class="bg-white py-4 mt-8 border-t">
+        <div class="container mx-auto px-4 text-center text-gray-600">
+            <p>©2024 乔木的YouTube视频下载器，仅供学习使用</p>
+            <p class="mt-1">联系人: 乔木 | 邮箱: <a href="mailto:qiaomu6666@gmail.com" class="text-blue-500 hover:text-blue-600">qiaomu6666@gmail.com</a></p>
+        </div>
+    </footer>
+
+    <script>
+        async function downloadVideo() {
+            const videoUrl = document.getElementById('video-url').value;
+            if (!videoUrl) {
+                alert('请输入视频链接');
+                return;
+            }
+
+            // 显示进度条
+            document.getElementById('progress').classList.remove('hidden');
+            
+            const formData = new FormData();
+            formData.append('video_url', videoUrl);
+            
+            try {
+                // 发起下载请求
+                const response = await fetch('/download', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                if (!data.video_id) {
+                    alert('下载请求失败');
+                    return;
+                }
+                
+                const videoId = data.video_id;
+                
+                // 轮询下载进度
+                const progressInterval = setInterval(async () => {
+                    const progressResponse = await fetch(`/progress/${videoId}`);
+                    const progressData = await progressResponse.json();
+                    
+                    const progressBar = document.getElementById('progress-bar');
+                    const progressText = document.getElementById('progress-text');
+                    const statusText = document.getElementById('download-status');
+                    
+                    if (progressData.status === 'downloading') {
+                        const progress = progressData.progress || '0%';
+                        progressBar.style.width = progress;
+                        progressText.textContent = progress;
+                        statusText.textContent = `下载速度: ${progressData.speed} | 预计剩余时间: ${progressData.eta}`;
+                    } else if (progressData.status === 'finished') {
+                        clearInterval(progressInterval);
+                        progressBar.style.width = '100%';
+                        progressText.textContent = '100%';
+                        statusText.textContent = `下载完成！\n文件保存在: ${progressData.file_path}`;
+                        
+                        // 清空输入框，但保持进度条和完成信息显示
+                        document.getElementById('video-url').value = '';
+                    } else if (progressData.status === 'error') {
+                        clearInterval(progressInterval);
+                        statusText.textContent = `下载失败: ${progressData.error}`;
+                    }
+                }, 1000);
+            } catch (error) {
+                alert('下载失败：' + error.message);
+            }
+        }
+    </script>
+</body>
+</html> 
