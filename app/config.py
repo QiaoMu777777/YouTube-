@@ -21,5 +21,8 @@ class Settings:
     def create_directories(self):
         self.VIDEOS_DIR.mkdir(parents=True, exist_ok=True)
 
+# 修改下载路径配置
+DOWNLOAD_PATH = '/home/你的用户名/YouTube下载器/downloads'  # PythonAnywhere 的路径
+
 settings = Settings()
 settings.create_directories() 
